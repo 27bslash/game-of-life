@@ -87,4 +87,5 @@ function draw() {
     }
   }
   grid = nextGen;
+  text(generations);
 }
