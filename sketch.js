@@ -3,8 +3,6 @@ let cols,
   sqWidth = 10,
   grid = [],
   generations = 0,
-  randomButton,
-  startStop,
   started = false;
 
 function matrix(h, w) {
@@ -24,13 +22,8 @@ function setup() {
   cols = width / sqWidth;
   rows = height / sqWidth;
   grid = matrix(rows, cols);
-  randomButton = createButton("randomise");
-  randomButton.mousePressed(createBoard);
-  gliderButton = createButton("createPattern");
-  gliderButton.mousePressed(createPattern);
-  startStop = createButton("start");
-  startStop.mousePressed(start);
   createPattern();
+  start();
 }
 function start() {
   if (started == false) {
@@ -56,16 +49,29 @@ function createBoard() {
     }
   }
 }
-// function mousePressed() {
-//   for (var j = 0; j < rows; j++) {
-//     for (var i = 0; i < cols; i++) {
-//       var dis = dist(mouseX, mouseY, grid[i], y[j]);
-//       console.log(dis);
-//       if (dis < sqWidth / 2) col[j * 10 + i] = !col[j * 10 + i];
-//     }
-//   }
-// }
-function drawGen() {
+function mouseDragged() {
+  let x = Math.floor(mouseX / sqWidth);
+  let y = Math.floor(mouseY / sqWidth);
+  if (x < cols && y < rows && x >= 0 && y >= 0) {
+    grid[x][y] = 1;
+  }
+}
+function mousePressed() {
+  let x = Math.floor(mouseX / sqWidth);
+  let y = Math.floor(mouseY / sqWidth);
+  if (x < cols && y < rows && x >= 0 && y >= 0) {
+    if (grid[x][y] == 1) {
+      grid[x][y] = 0;
+    } else {
+      grid[x][y] = 1;
+    }
+  }
+}
+function keyPressed() {
+  if (keyCode == 32) start();
+  if (keyCode == 82) clearBoard();
+}
+function drawText() {
   fill(255, 0, 0);
   textSize(sqWidth * 3);
   textAlign(LEFT);
@@ -81,7 +87,6 @@ function createPattern() {
   }
   return grid;
 }
-
 function draw() {
   background(0);
   for (let i = 0; i < rows; i++) {
@@ -89,7 +94,7 @@ function draw() {
       let x = i * sqWidth;
       let y = j * sqWidth;
       if (grid[i][j] == 1) {
-        fill(255);
+        fill(0, 255, 0);
         stroke(0);
         rect(x, y, sqWidth);
       }
@@ -129,7 +134,7 @@ function draw() {
     }
     grid = nextGen;
   }
-  drawGen();
+  drawText();
 }
 //patterns
 const gliderGun = [

@@ -4,11 +4,16 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>game of life</title>
+    <title>Game of Life</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.min.js"></script>
-    <script src="gen.js"></script>
     <script src="sketch.js"></script>
   <body>
+    <div id='button-wrapper'>
+    <button onclick=createBoard()>RANDOMIZE</button>  
+    <button onclick=createPattern()>GLIDER GUN</button>
+    <button onclick=start()>START</button>
+    <button onclick=clearBoard()>RESET</button>
+  </div>
   </body>
 </html>
