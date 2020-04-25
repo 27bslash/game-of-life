@@ -18,7 +18,10 @@ function matrix(h, w) {
   }
   return arr;
 }
-
+function clearState(){
+  copying = false,
+  copiedSection = [];
+}
 function setup() {
   createCanvas(900, 900);
   frameRate(15);
@@ -37,6 +40,8 @@ function start() {
 }
 function clearBoard() {
   started = false;
+  copied = false;
+  copiedSection = [];
   generations = 0;
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
@@ -86,14 +91,15 @@ function copySection() {
   if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
     let x1 = Math.floor(firstPos[0] / sqWidth),
       y1 = Math.floor(firstPos[1] / sqWidth),
-      x2 = Math.floor(mouseX / sqWidth),
-      y2 = Math.floor(mouseY / sqWidth);
-    firstPos.push(mouseX, mouseY);
-    console.log(x1, y1, x2, y2);
+      x2 = Math.round(mouseX / sqWidth),
+      y2 = Math.round(mouseY / sqWidth);
+    firstPos.push(mouseX);
+    firstPos.push(mouseY);
+    console.log("c", "x: ", x1, x2, "y:", y1, y2);
     if (copiedSection.length < 1) {
-      for (let i = y1; i <= y2; i++) {
-        for (let j = x1; j <= x2; j++) {
-          // console.log(i, j);
+      for (let i = Math.min(y1, y2); i < Math.max(y1, y2); i++) {
+        for (let j = Math.min(x1, x2); j < Math.max(x1, x2); j++) {
+          console.log(i, j);
           copiedSection.push(grid[j][i]);
           arr = chunk(copiedSection, Math.abs(x1 - x2));
         }
@@ -119,24 +125,17 @@ function pasteSection(minX, minY) {
     startY = Math.floor(minY / sqWidth),
     maxX = startX + copiedSection[0].length;
   maxY = startY + copiedSection.length;
+  console.log("length: ", copiedSection.length, copiedSection[0].length);
   if (
     maxY <= height / sqWidth &&
     startY >= 0 &&
     maxX <= width / sqWidth &&
     startX >= 0
   ) {
-    console.log(
-      startX,
-      startY,
-      maxX,
-      maxY,
-      copiedSection.length,
-      copiedSection[0].length
-    );
-    for (let i = 0; i < copiedSection[0].length; i++) {
-      for (let j = 0; j < copiedSection.length; j++) {
+    for (let i = 0; i < copiedSection.length; i++) {
+      for (let j = 0; j < copiedSection[0].length; j++) {
         // console.log(copiedSection[i][j]);
-        grid[startX + i][startY + j] = copiedSection[i][j];
+        grid[startX + j][startY + i] = copiedSection[i][j];
       }
     }
   }
@@ -145,6 +144,8 @@ function pasteSection(minX, minY) {
 function keyPressed() {
   if (keyCode == 32) start();
   if (keyCode == 82) clearBoard();
+  if (keyCode == 86) pasteSection(mouseX, mouseY);
+  if(keyCode == ESCAPE) clearState()
 }
 function drawText() {
   fill(255, 0, 0);
