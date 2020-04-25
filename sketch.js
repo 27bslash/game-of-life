@@ -3,7 +3,10 @@ let cols,
   sqWidth = 10,
   grid = [],
   generations = 0,
-  started = false;
+  started = false,
+  firstPos = [],
+  copying = false,
+  copiedSection = [];
 
 function matrix(h, w) {
   let arr = [];
@@ -57,15 +60,87 @@ function mouseDragged() {
   }
 }
 function mousePressed() {
-  let x = Math.floor(mouseX / sqWidth);
-  let y = Math.floor(mouseY / sqWidth);
-  if (x < cols && y < rows && x >= 0 && y >= 0) {
-    if (grid[x][y] == 1) {
-      grid[x][y] = 0;
-    } else {
-      grid[x][y] = 1;
+  if (copying) {
+    started = false;
+    copySection();
+  } else if (copiedSection.length >= 1) {
+    pasteSection(mouseX, mouseY);
+  } else {
+    let x = Math.floor(mouseX / sqWidth);
+    let y = Math.floor(mouseY / sqWidth);
+    if (x < cols && y < rows && x >= 0 && y >= 0) {
+      if (grid[x][y] == 1) {
+        grid[x][y] = 0;
+      } else {
+        grid[x][y] = 1;
+      }
     }
   }
+}
+function copySection() {
+  copying = true;
+  let arr = [];
+  if (copying && copiedSection.length >= 1) {
+    copiedSection = [];
+  }
+  if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+    let x1 = Math.floor(firstPos[0] / sqWidth),
+      y1 = Math.floor(firstPos[1] / sqWidth),
+      x2 = Math.floor(mouseX / sqWidth),
+      y2 = Math.floor(mouseY / sqWidth);
+    firstPos.push(mouseX, mouseY);
+    console.log(x1, y1, x2, y2);
+    if (copiedSection.length < 1) {
+      for (let i = y1; i <= y2; i++) {
+        for (let j = x1; j <= x2; j++) {
+          // console.log(i, j);
+          copiedSection.push(grid[j][i]);
+          arr = chunk(copiedSection, Math.abs(x1 - x2));
+        }
+      }
+    }
+    console.log(copiedSection);
+    copiedSection = arr;
+    if (copiedSection.length >= 1) copying = false;
+    // console.log(x1, y1, x2, y2);
+    if (firstPos.length > 2) firstPos = [];
+  }
+}
+function chunk(arr, w) {
+  let temp = [];
+  for (let i = 0; i < arr.length; i += w) {
+    temp.push(arr.slice(i, w + i));
+  }
+  return temp;
+}
+//try select cells maybe
+function pasteSection(minX, minY) {
+  let startX = Math.floor(minX / sqWidth),
+    startY = Math.floor(minY / sqWidth),
+    maxX = startX + copiedSection[0].length;
+  maxY = startY + copiedSection.length;
+  if (
+    maxY <= height / sqWidth &&
+    startY >= 0 &&
+    maxX <= width / sqWidth &&
+    startX >= 0
+  ) {
+    console.log(
+      startX,
+      startY,
+      maxX,
+      maxY,
+      copiedSection.length,
+      copiedSection[0].length
+    );
+    for (let i = 0; i < copiedSection[0].length; i++) {
+      for (let j = 0; j < copiedSection.length; j++) {
+        // console.log(copiedSection[i][j]);
+        grid[startX + i][startY + j] = copiedSection[i][j];
+      }
+    }
+  }
+  console.log(copiedSection);
 }
 function keyPressed() {
   if (keyCode == 32) start();
@@ -94,6 +169,7 @@ function draw() {
       let x = i * sqWidth;
       let y = j * sqWidth;
       if (grid[i][j] == 1) {
+        rectMode(CORNER);
         fill(0, 255, 0);
         stroke(0);
         rect(x, y, sqWidth);
@@ -135,6 +211,10 @@ function draw() {
     grid = nextGen;
   }
   drawText();
+  rectMode(CORNERS);
+  // console.log(firstPos, firstPos[0], firstPos[1], mouseX, mouseY);
+  rect(firstPos[0], firstPos[1], mouseX, mouseY);
+  noFill();
 }
 //patterns
 const gliderGun = [
