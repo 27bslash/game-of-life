@@ -13,14 +13,13 @@ function matrix(h, w) {
   for (var y = 0; y < h; y++) {
     arr[y] = [];
     for (var x = 0; x < w; x++) {
-      arr[y][x] = 0;
+      arr[y][x] = 2;
     }
   }
   return arr;
 }
-function clearState(){
-  copying = false,
-  copiedSection = [];
+function clearState() {
+  (copying = false), (copiedSection = []);
 }
 function setup() {
   createCanvas(900, 900);
@@ -93,9 +92,7 @@ function copySection() {
       y1 = Math.floor(firstPos[1] / sqWidth),
       x2 = Math.round(mouseX / sqWidth),
       y2 = Math.round(mouseY / sqWidth);
-    firstPos.push(mouseX);
-    firstPos.push(mouseY);
-    console.log("c", "x: ", x1, x2, "y:", y1, y2);
+    firstPos.push(mouseX, mouseY);
     if (copiedSection.length < 1) {
       for (let i = Math.min(y1, y2); i < Math.max(y1, y2); i++) {
         for (let j = Math.min(x1, x2); j < Math.max(x1, x2); j++) {
@@ -125,7 +122,6 @@ function pasteSection(minX, minY) {
     startY = Math.floor(minY / sqWidth),
     maxX = startX + copiedSection[0].length;
   maxY = startY + copiedSection.length;
-  console.log("length: ", copiedSection.length, copiedSection[0].length);
   if (
     maxY <= height / sqWidth &&
     startY >= 0 &&
@@ -134,18 +130,19 @@ function pasteSection(minX, minY) {
   ) {
     for (let i = 0; i < copiedSection.length; i++) {
       for (let j = 0; j < copiedSection[0].length; j++) {
-        // console.log(copiedSection[i][j]);
         grid[startX + j][startY + i] = copiedSection[i][j];
       }
     }
   }
-  console.log(copiedSection);
 }
 function keyPressed() {
   if (keyCode == 32) start();
   if (keyCode == 82) clearBoard();
-  if (keyCode == 86) pasteSection(mouseX, mouseY);
-  if(keyCode == ESCAPE) clearState()
+  if (keyCode == ESCAPE) clearState();
+  if (keyIsDown(17)) {
+    if (keyCode == 67) copySection();
+    else if (keyCode == 86) pasteSection(mouseX, mouseY);
+  }
 }
 function drawText() {
   fill(255, 0, 0);
@@ -213,7 +210,6 @@ function draw() {
   }
   drawText();
   rectMode(CORNERS);
-  // console.log(firstPos, firstPos[0], firstPos[1], mouseX, mouseY);
   rect(firstPos[0], firstPos[1], mouseX, mouseY);
   noFill();
 }
