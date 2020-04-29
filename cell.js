@@ -1,6 +1,5 @@
 class Cell {
   constructor() {
-    this.started = true;
     this.generations = 0;
   }
   nextGeneration() {
