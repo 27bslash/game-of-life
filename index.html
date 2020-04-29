@@ -5,16 +5,36 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Game of Life</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.min.js"></script>
-    <script src="sketch.js"></script>
+    <script
+      src="https://kit.fontawesome.com/452aecdbf8.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
   <body>
-    <div id='button-wrapper'>
-    <button onclick=createBoard()>RANDOMIZE</button>  
-    <button onclick=createPattern()>GLIDER GUN</button>
-    <button onclick=copySection()>COPY</button>
-    <button onclick=start()>START</button>
-    <button onclick=clearBoard()>RESET</button>
-  </div>
+    <script src="board.js"></script>
+    <script src="cell.js"></script>
+    <script src="sketch.js"></script>
+    <h3 id="generation-text"></h3>
+    <div id="button-wrapper">
+      <i class="fas fa-home" title="Home" onclick="createPattern()"></i>
+      <i
+        id="play-button"
+        title="Play"
+        class="fas fa-pause"
+        onclick="start()"
+      ></i>
+      <i class="fas fa-random" title="Random" onclick="createBoard()"></i>
+      <i class="fas fa-copy" title="Copy" onclick="copySection()"></i>
+      <i class="far fa-trash-alt" title="Clear" onclick="clearBoard()"></i>
+      <i
+        class="fas fa-border-all"
+        title="Toggle Grid"
+        onclick="toggleStroke()"
+      ></i>
+      <!-- <i class="fas fa-braille" title="Toggle Fade" onclick="toggleFade()"></i> -->
+    </div>
   </body>
 </html>

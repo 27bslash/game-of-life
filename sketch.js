@@ -2,46 +2,39 @@ let cols,
   rows,
   sqWidth = 10,
   grid = [],
-  generations = 0,
+  board,
+  cell,
   started = false,
   firstPos = [],
   copying = false,
-  copiedSection = [];
+  copiedSection = [],
+  strokeBool = true,
+  fade = true;
 
-function matrix(h, w) {
-  let arr = [];
-  for (var y = 0; y < h; y++) {
-    arr[y] = [];
-    for (var x = 0; x < w; x++) {
-      arr[y][x] = 2;
-    }
-  }
-  return arr;
-}
-function clearState() {
-  (copying = false), (copiedSection = []);
-}
 function setup() {
   createCanvas(900, 900);
   frameRate(15);
   cols = width / sqWidth;
   rows = height / sqWidth;
-  grid = matrix(rows, cols);
+  board = new Board();
+  cell = new Cell();
+  grid = board.grid;
   createPattern();
   start();
 }
 function start() {
-  if (started == false) {
-    started = true;
-  } else {
-    started = false;
-  }
+  started = !started;
+}
+function clearState() {
+  firstPos = [];
+  copying = false;
+  copiedSection = [];
 }
 function clearBoard() {
   started = false;
   copied = false;
   copiedSection = [];
-  generations = 0;
+  cell.generations = 0;
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       grid[i][j] = 0;
@@ -83,6 +76,7 @@ function mousePressed() {
 }
 function copySection() {
   copying = true;
+  started = false;
   let arr = [];
   if (copying && copiedSection.length >= 1) {
     copiedSection = [];
@@ -96,7 +90,6 @@ function copySection() {
     if (copiedSection.length < 1) {
       for (let i = Math.min(y1, y2); i < Math.max(y1, y2); i++) {
         for (let j = Math.min(x1, x2); j < Math.max(x1, x2); j++) {
-          console.log(i, j);
           copiedSection.push(grid[j][i]);
           arr = chunk(copiedSection, Math.abs(x1 - x2));
         }
@@ -105,7 +98,6 @@ function copySection() {
     console.log(copiedSection);
     copiedSection = arr;
     if (copiedSection.length >= 1) copying = false;
-    // console.log(x1, y1, x2, y2);
     if (firstPos.length > 2) firstPos = [];
   }
 }
@@ -116,7 +108,6 @@ function chunk(arr, w) {
   }
   return temp;
 }
-//try select cells maybe
 function pasteSection(minX, minY) {
   let startX = Math.floor(minX / sqWidth),
     startY = Math.floor(minY / sqWidth),
@@ -136,7 +127,7 @@ function pasteSection(minX, minY) {
   }
 }
 function keyPressed() {
-  if (keyCode == 32) start();
+  if (keyCode == 32 || 84) start();
   if (keyCode == 82) clearBoard();
   if (keyCode == ESCAPE) clearState();
   if (keyIsDown(17)) {
@@ -144,11 +135,11 @@ function keyPressed() {
     else if (keyCode == 86) pasteSection(mouseX, mouseY);
   }
 }
-function drawText() {
-  fill(255, 0, 0);
-  textSize(sqWidth * 3);
-  textAlign(LEFT);
-  text(generations, sqWidth / 2, sqWidth * 3);
+function drawCopy() {
+  noFill();
+  stroke(0, 0, 255);
+  rectMode(CORNERS);
+  rect(firstPos[0], firstPos[1], mouseX, mouseY);
 }
 function createPattern() {
   clearBoard();
@@ -160,58 +151,34 @@ function createPattern() {
   }
   return grid;
 }
+//very stupid, just toggle everything with one function
+function toggleStroke() {
+  strokeBool = !strokeBool;
+}
+function toggleFade() {
+  fade = !fade;
+}
 function draw() {
-  background(0);
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      let x = i * sqWidth;
-      let y = j * sqWidth;
-      if (grid[i][j] == 1) {
-        rectMode(CORNER);
-        fill(0, 255, 0);
-        stroke(0);
-        rect(x, y, sqWidth);
-      }
-    }
+  if (!copying) {
+    colorMode(RGB);
+    background(0, 0, 0, 25);
+  } else {
+    colorMode(RGB);
+    background(0);
   }
   if (started) {
-    generations++;
-    let nextGen = matrix(rows, cols);
-    for (let i = 0; i < rows - 1; i++) {
-      for (let j = 0; j < cols - 1; j++) {
-        let liveCount = 0;
-        if (j < cols && grid[i][j + 1] == 1) liveCount++;
-        if (j > 0 && grid[i][j - 1] == 1) liveCount++;
-        // top/bottom
-        if (i < rows && grid[i + 1][j] == 1) liveCount++;
-        if (i > 0 && grid[i - 1][j] == 1) liveCount++;
-        //diagonal top-left/top-right
-        if (i > 0 && j > 0 && grid[i - 1][j - 1] == 1) liveCount++;
-        if (i > 0 && j < cols && grid[i - 1][j + 1] == 1) liveCount++;
-        //diagonal bottom-left/bottom-right
-        if (i < rows && j > 0 && grid[i + 1][j - 1] == 1) liveCount++;
-        if (i < rows && j < cols && grid[i + 1][j + 1] == 1) liveCount++;
-        if (grid[i][j] == 1) {
-          if (liveCount < 2 || liveCount > 3) {
-            nextGen[i][j] = 0;
-          } else {
-            nextGen[i][j] = grid[i][j];
-          }
-        } else if (grid[i][j] == 0) {
-          if (liveCount == 3) {
-            nextGen[i][j] = 1;
-          } else {
-            nextGen[i][j] = grid[i][j];
-          }
-        }
-      }
-    }
-    grid = nextGen;
+    document.getElementById("play-button").className = "fas fa-pause";
+    cell.nextGeneration();
+  } else {
+    document.getElementById("play-button").className = "fas fa-play";
   }
-  drawText();
-  rectMode(CORNERS);
-  rect(firstPos[0], firstPos[1], mouseX, mouseY);
-  noFill();
+  board.show();
+  if (cell.generations > 0) {
+    document.getElementById("generation-text").textContent = cell.generations;
+  } else {
+    document.getElementById("generation-text").textContent = "";
+  }
+  drawCopy();
 }
 //patterns
 const gliderGun = [
